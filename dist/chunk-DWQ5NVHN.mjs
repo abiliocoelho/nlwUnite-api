@@ -1,18 +1,21 @@
-import { FastifyInstance } from 'fastify'
-import { ZodTypeProvider } from 'fastify-type-provider-zod'
-import { z } from 'zod'
-import { prisma } from '../lib/prisma'
-import { BadRequest } from './_errors /bad-request'
+import {
+  BadRequest
+} from "./chunk-KWNZL4AC.mjs";
+import {
+  prisma
+} from "./chunk-5KVQPZKD.mjs";
 
-export async function getEvent(app: FastifyInstance) {
-  app.withTypeProvider<ZodTypeProvider>().get(
-    '/events/:eventId',
+// src/routes/get-events.ts
+import { z } from "zod";
+async function getEvent(app) {
+  app.withTypeProvider().get(
+    "/events/:eventId",
     {
       schema: {
-        summary: 'Get an event',
-        tags: ['events'],
+        summary: "Get an event",
+        tags: ["events"],
         params: z.object({
-          eventId: z.string().uuid(),
+          eventId: z.string().uuid()
         }),
         response: {
           200: z.object({
@@ -22,14 +25,14 @@ export async function getEvent(app: FastifyInstance) {
               details: z.string().nullable(),
               slug: z.string(),
               maximumAttendees: z.number().int().positive().nullable(),
-              attendeesAmount: z.number().int(),
-            }),
-          }),
-        },
-      },
+              attendeesAmount: z.number().int()
+            })
+          })
+        }
+      }
     },
     async (request, reply) => {
-      const { eventId } = request.params
+      const { eventId } = request.params;
       const event = await prisma.event.findUnique({
         select: {
           id: true,
@@ -39,19 +42,17 @@ export async function getEvent(app: FastifyInstance) {
           maximumAttendees: true,
           _count: {
             select: {
-              attendees: true,
-            },
-          },
+              attendees: true
+            }
+          }
         },
         where: {
-          id: eventId,
-        },
-      })
-
+          id: eventId
+        }
+      });
       if (!event) {
-        throw new BadRequest('Event not found')
+        throw new BadRequest("Event not found");
       }
-
       return reply.send({
         event: {
           id: event.id,
@@ -59,9 +60,13 @@ export async function getEvent(app: FastifyInstance) {
           slug: event.slug,
           details: event.details,
           maximumAttendees: event.maximumAttendees,
-          attendeesAmount: event._count.attendees,
-        },
-      })
-    },
-  )
+          attendeesAmount: event._count.attendees
+        }
+      });
+    }
+  );
 }
+
+export {
+  getEvent
+};
